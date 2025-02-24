@@ -23,7 +23,7 @@ This project is a **Mobile Price Prediction** system that uses **Machine Learnin
 ## 📂 Project Structure  
 
 ```
-📁 mobile-price-prediction-mvp  
+📁 Mobile-Price-Prediction
 │── 📂 static/            # Static files (CSS, JS)  
 │── 📂 templates/         # HTML templates  
 │── 📂 models/            # Trained ML Model  
