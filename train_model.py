@@ -12,15 +12,14 @@ from sklearn.ensemble import RandomForestRegressor
 # Load dataset
 df = pd.read_csv("data/mobile_data.csv", encoding="ISO-8859-1")
 
-# Convert column names to lowercase
+# Standardize column names
 df.columns = df.columns.str.lower()
-
-# Rename columns
 df.rename(columns={
     "company name": "company",
     "ram": "ram",
     "front camera": "front_camera",
     "back camera": "back_camera",
+    "processor": "processor",
     "battery capacity": "battery",
     "launched price (india)": "price"
 }, inplace=True)
@@ -35,45 +34,45 @@ def extract_number(value):
         return float(num[0]) if num else np.nan
     return value
 
-df["ram"] = df["ram"].apply(extract_number)
-df["front_camera"] = df["front_camera"].apply(extract_number)
-df["back_camera"] = df["back_camera"].apply(extract_number)
-df["battery"] = df["battery"].apply(extract_number)
-df["price"] = df["price"].apply(extract_number)
+# Apply cleaning function
+for col in ["ram", "front_camera", "back_camera", "battery", "price"]:
+    df[col] = df[col].apply(extract_number)
+
+# Adding ROM column manually based on domain knowledge
+def assign_rom(ram):
+    """ Assign ROM based on RAM using domain knowledge """
+    if ram <= 2:
+        return 32
+    elif ram <= 4:
+        return 64
+    elif ram <= 6:
+        return 128
+    elif ram <= 8:
+        return 256
+    elif ram <= 12:
+        return 512
+    else:
+        return 1024
+
+df["rom"] = df["ram"].apply(assign_rom)
+
+# Adjust price based on RAM-ROM combinations
+def adjust_price(row):
+    base_price = row["price"]
+    rom_diff = (row["rom"] - assign_rom(row["ram"])) // 64
+    price_adjustment = rom_diff * 2000  # Adjust ROM pricing
+    return base_price + price_adjustment
+
+df["price"] = df.apply(adjust_price, axis=1)
 
 # Drop missing values
 df.dropna(inplace=True)
 
-# Standardize RAM values (round to nearest standard value)
-def round_ram(value):
-    possible_rams = [2, 3, 4, 6, 8, 12, 16]
-    return min(possible_rams, key=lambda x: abs(x - value))  # Find closest match
+# ✅ Ensure 'screen_size' and 'weight' are completely removed
+columns_to_keep = ["company", "ram", "rom", "front_camera", "back_camera", "battery", "price"]
+df = df[columns_to_keep]  # Only keep required columns
 
-df["ram"] = df["ram"].apply(round_ram)
-
-# Assign ROM values based on RAM
-ram_rom_mapping = {
-    2: 32,
-    3: 32,
-    4: 64,
-    6: 128,
-    8: 128,
-    12: 256,
-    16: 512
-}
-
-df["rom"] = df["ram"].map(ram_rom_mapping)
-
-# Adjust prices based on ROM (~₹2000 increments)
-def adjust_price(row):
-    base_price = row["price"]
-    expected_rom = ram_rom_mapping[row["ram"]]
-    rom_diff = (row["rom"] - expected_rom) // 64  # ROM-based increment
-    return base_price + (rom_diff * 2000)
-
-df["price"] = df.apply(adjust_price, axis=1)
-
-# Select features
+# Select features & target
 X = df[["company", "ram", "rom", "front_camera", "back_camera", "battery"]]
 y = df["price"].astype(float)
 
@@ -89,10 +88,10 @@ preprocessor = ColumnTransformer([
 # Create pipeline
 model = Pipeline([
     ("preprocessor", preprocessor),
-    ("regressor", RandomForestRegressor(n_estimators=200, random_state=42))
+    ("regressor", RandomForestRegressor(n_estimators=100, random_state=42))
 ])
 
-# Train-test split
+# Split dataset
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
 # Train model
@@ -103,4 +102,4 @@ os.makedirs("models", exist_ok=True)
 with open("models/model.pkl", "wb") as f:
     pickle.dump(model, f)
 
-print("✅ Model trained and saved successfully!")
+print("✅ Model retrained successfully with refined pricing logic!")
