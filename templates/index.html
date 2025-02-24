@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Price Prediction</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</head>
+<body>
+    <div class="container">
+        <h2>📱 Predict Mobile Price</h2>
+
+        <label for="company">Company:</label>
+        <select id="company">
+            <option value="" disabled selected>Select a company</option>
+            <option value="Samsung">Samsung</option>
+            <option value="OnePlus">OnePlus</option>
+            <option value="Vivo">Vivo</option>
+            <option value="iQOO">iQOO</option>
+            <option value="Oppo">Oppo</option>
+            <option value="Realme">Realme</option>
+            <option value="Xiaomi">Xiaomi</option>
+            <option value="Lenovo">Lenovo</option>
+            <option value="Motorola">Motorola</option>
+            <option value="Huawei">Huawei</option>
+            <option value="Nokia">Nokia</option>
+            <option value="Sony">Sony</option>
+            <option value="Google">Google</option>
+            <option value="Tecno">Tecno</option>
+            <option value="Infinix">Infinix</option>
+            <option value="Honor">Honor</option>
+            <option value="POCO">POCO</option>
+        </select>
+
+        <label for="ram">RAM (GB):</label>
+        <input type="number" id="ram" placeholder="Enter RAM" min="2" max="24" onkeydown="preventInput(event)" onwheel="preventScroll(event)">
+
+        <label for="rom">Storage (GB):</label>
+        <input type="number" id="rom" placeholder="Enter Storage" min="32" max="512" onkeydown="preventInput(event)" onwheel="preventScroll(event)">
+
+        <label for="front_camera">Front Camera (MP):</label>
+        <input type="number" id="front_camera" placeholder="Enter Front Camera MP" min="2" max="60" onkeydown="preventInput(event)" onwheel="preventScroll(event)">
+
+        <label for="back_camera">Back Camera (MP):</label>
+        <input type="number" id="back_camera" placeholder="Enter Back Camera MP" min="5" max="200" onkeydown="preventInput(event)" onwheel="preventScroll(event)">
+
+        <label for="battery">Battery Capacity (mAh):</label>
+        <input type="number" id="battery" placeholder="Enter Battery Capacity" min="2000" max="10000" onkeydown="preventInput(event)" onwheel="preventScroll(event)">
+
+        <button onclick="predictPrice()">🔍 Predict Price</button>
+
+        <div id="loading" class="hidden">💭 Thinking... Please wait</div>
+        <h3 id="result"></h3>
+    </div>
+</body>
+</html>
